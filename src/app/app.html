@@ -1,127 +1,125 @@
-<div class="min-h-screen bg-gray-100 pb-20">
-
-  <div *ngIf="mensagemSucesso" 
-       class="fixed top-20 right-5 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-2xl transition-all animate-bounce">
-    {{ mensagemSucesso }}
-  </div>
-
-  <header class="bg-black text-white p-4 flex justify-between items-center sticky top-0 z-10 shadow-lg">
-    <h1 class="text-xl font-bold">🛒 Mini Loja da Lívia</h1>
+<ng-container *ngIf="logado">
+  <div class="min-h-screen bg-[#f7f3f0] text-[#2d2926]">
     
-    <div class="flex gap-6 items-center">
-      <button *ngIf="carrinho.length > 0" (click)="limparCarrinho()"
-        class="text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition">
-        Limpar Tudo 🗑️
-      </button>
+    <header class="bg-[#f0eae4]/90 backdrop-blur-md border-b border-[#d6ccc2] p-5 flex justify-between items-center sticky top-0 z-10">
+      <h1 class="text-xl font-black tracking-[0.2em] uppercase">Lívia Store</h1>
+      <div class="flex gap-5">
+        <button (click)="verMeusPedidos()" class="text-xs font-black uppercase tracking-widest hover:text-[#b06d50]">Pedidos</button>
+        <button (click)="logout()" class="text-xs text-[#8c786a] font-black uppercase tracking-widest hover:text-red-600">Sair</button>
+      </div> 
+    </header>
 
-      <div class="bg-gray-800 px-3 py-1 rounded-full text-sm">
-        Itens: <strong>{{ carrinho.length }}</strong>
-      </div>
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-8 p-8">
       
-      <div class="text-green-400 font-mono text-lg font-bold">
-        {{ total | currency:'BRL' }}
-      </div>
-    </div> 
-  </header>
+      <aside *ngIf="!exibirHistorico" class="w-full md:w-64 flex-shrink-0">
+        <nav class="sticky top-28 bg-white p-8 rounded-[2.5rem] border border-[#ede7e1] shadow-sm">
+          <p class="text-[10px] font-black text-[#8c786a] uppercase tracking-[0.3em] mb-8 border-b border-[#f0eae4] pb-2">Seções</p>
+          <ul class="space-y-6">
+            <li><button (click)="filtrar('todos')" class="font-black text-xs uppercase tracking-widest hover:text-[#b06d50]">Ver Tudo</button></li>
+            <li><button (click)="filtrar('camisetas')" class="font-black text-xs uppercase tracking-widest hover:text-[#b06d50]">Camisetas</button></li>
+            <li><button (click)="filtrar('calcados')" class="font-black text-xs uppercase tracking-widest hover:text-[#b06d50]">Calçados</button></li>
+            <li><button (click)="filtrar('acessorios')" class="font-black text-xs uppercase tracking-widest hover:text-[#b06d50]">Acessórios</button></li>
+          </ul>
+        </nav>
+      </aside>
 
-  <main class="p-6 max-w-6xl mx-auto">
-    <h2 class="text-2xl font-bold mb-6 text-gray-800">Nossos Produtos</h2>
-    
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div *ngFor="let produto of produtos"
-        class="bg-white shadow-md rounded-xl p-5 border border-gray-200 hover:shadow-xl transition-shadow flex flex-col">
-        <div class="w-full h-48 overflow-hidden rounded-lg mb-4 bg-gray-200">
-           <img [src]="produto.imagem" [alt]="produto.nome" class="w-full h-full object-cover">
-        </div>
-        <h3 class="text-lg font-bold text-gray-800 mb-1">{{ produto.nome }}</h3>
-        <p class="text-xl text-blue-600 font-bold mb-4">{{ produto.preco | currency:'BRL' }}</p>
-        <button (click)="adicionar(produto)"
-          class="w-full bg-black text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600 active:scale-95 transition-all mt-auto">
-          Adicionar ao carrinho
-        </button>
-      </div>
-    </div>
-
-    <section *ngIf="carrinho.length > 0" class="mt-12 p-6 bg-white rounded-2xl shadow-lg border border-gray-200">
-      <h2 class="text-2xl font-bold mb-6 text-gray-800 flex items-center gap-2">Seu Carrinho 🛍️</h2>
-
-      <ul class="divide-y divide-gray-100">
-        <li *ngFor="let item of carrinho" class="py-4 flex justify-between items-center">
-          <div class="flex items-center gap-4">
-            <div class="relative">
-              <img [src]="item.imagem" class="w-16 h-16 rounded-lg object-cover border">
-              <span class="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                x{{ item.quantidade }}
-              </span>
+      <main class="flex-grow">
+        
+        <div *ngIf="!exibirHistorico">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div *ngFor="let produto of produtosFiltrados" class="bg-white rounded-[2rem] p-6 shadow-sm border border-[#ede7e1] flex flex-col">
+              <div class="aspect-square overflow-hidden rounded-2xl mb-5 bg-[#f0eae4]">
+                <img [src]="produto.imagem" class="w-full h-full object-cover">
+              </div>
+              <h3 class="text-lg font-black mb-1 uppercase">{{ produto.nome }}</h3>
+              <p class="text-[#b06d50] font-black mb-5 text-xl">{{ produto.preco | currency:'BRL' }}</p>
+              <button (click)="adicionar(produto)" class="w-full bg-[#b06d50] text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest">
+                Adicionar
+              </button>
             </div>
-            <div class="flex flex-col">
-              <span class="font-bold text-gray-800">{{ item.nome }}</span>
-              <div class="flex items-center gap-2 mt-1">
-                <button (click)="removerUm(item)" class="bg-gray-100 hover:bg-red-100 w-6 h-6 flex items-center justify-center rounded-full text-gray-700">-</button>
-                <span class="text-xs font-bold">{{ item.quantidade }}</span>
-                <button (click)="adicionar(item)" class="bg-gray-100 hover:bg-green-100 w-6 h-6 flex items-center justify-center rounded-full text-gray-700">+</button>
+          </div>
+
+          <section *ngIf="carrinho.length > 0" class="mt-20 p-10 bg-white rounded-[3rem] border-2 border-[#d6ccc2]">
+            <h2 class="text-2xl font-black mb-8 uppercase text-center">Seu Carrinho</h2>
+            <div *ngFor="let item of carrinho" class="flex justify-between py-3 border-b border-[#f0eae4]">
+              <span class="font-black text-sm uppercase">{{ item.nome }} ({{item.quantidade}}x)</span>
+              <span class="font-black">{{ (item.preco * item.quantidade) | currency:'BRL' }}</span>
+            </div>
+            <button (click)="irParaPagamento()" class="w-full bg-[#2d2926] text-white py-6 rounded-3xl font-black uppercase tracking-[0.3em] mt-8">
+              Pagar {{ total | currency:'BRL' }}
+            </button>
+          </section>
+        </div>
+
+        <div *ngIf="exibirHistorico" class="max-w-2xl mx-auto">
+          <div class="flex justify-between items-center mb-12">
+            <h2 class="text-3xl font-black uppercase tracking-tighter">Meus Pedidos</h2>
+            <button (click)="voltarParaLoja()" class="text-[#b06d50] border-2 border-[#b06d50] px-6 py-2 rounded-full font-black text-xs uppercase hover:bg-[#b06d50] hover:text-white transition">
+              Voltar à Loja
+            </button>
+          </div>
+
+          <div *ngIf="historicoPedidos.length === 0" class="text-center py-20 bg-white rounded-[3rem] border border-[#ede7e1]">
+            <p class="font-bold text-[#8c786a] uppercase tracking-widest">Você ainda não fez nenhum pedido.</p>
+          </div>
+
+          <div class="space-y-6">
+            <div *ngFor="let pedido of historicoPedidos" class="bg-white p-8 rounded-[2.5rem] border border-[#ede7e1] shadow-sm">
+              <div class="flex justify-between items-center mb-4 border-b pb-4 border-[#f0eae4]">
+                <span class="text-xs font-black text-[#8c786a] uppercase">{{ pedido.data }}</span>
+                <span class="text-xl font-black text-[#b06d50]">{{ pedido.valorTotal | currency:'BRL' }}</span>
+              </div>
+              <div class="space-y-2">
+                <div *ngFor="let item of pedido.itens" class="text-sm font-bold text-[#5a524e]">
+                  • {{ item.quantidade }}x {{ item.nome }}
+                </div>
               </div>
             </div>
           </div>
-          <span class="font-mono font-bold text-gray-900">{{ (item.preco * item.quantidade) | currency:'BRL' }}</span>
-        </li>
-      </ul>
+        </div>
 
-      <div class="mt-6 pt-6 border-t-4 border-black flex justify-between items-center">
-        <span class="text-xl font-bold text-gray-800">Total Geral:</span>
-        <span class="text-3xl font-black text-green-600 font-mono">{{ total | currency:'BRL' }}</span>
-      </div>
-
-      <button (click)="irParaPagamento()" 
-              class="w-full mt-6 bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 shadow-lg transition-all active:scale-95 text-lg">
-        Finalizar Compra 💳
+      </main>
+    </div>
+  </div>
+</ng-container>
+<div *ngIf="finalizando" class="fixed inset-0 bg-[#2d2926]/90 backdrop-blur-md z-[100] flex items-center justify-center p-6">
+  <div class="bg-white rounded-[3rem] p-10 max-w-md w-full border-4 border-[#b06d50] text-center shadow-2xl">
+    <h2 class="text-2xl font-black mb-2 uppercase tracking-widest text-[#2d2926]">Pagamento</h2>
+    <p class="text-[#8c786a] font-bold mb-8 italic">Total: {{ total | currency:'BRL' }}</p>
+    
+    <div class="space-y-3">
+      <button (click)="confirmarPagamento('PIX')" 
+              class="w-full py-4 bg-[#b06d50] text-white rounded-2xl font-black uppercase tracking-widest hover:bg-[#8e563f] transition-all">
+        PIX
       </button>
-    </section>
-  </main>
 
-  <div *ngIf="finalizando" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
-      <h2 class="text-2xl font-bold mb-6 text-gray-800">Como deseja pagar?</h2>
-      <div class="space-y-4">
-        
-        <div (click)="confirmarPagamento()" class="border-2 border-blue-100 p-4 rounded-2xl flex items-center gap-4 hover:bg-blue-50 cursor-pointer transition hover:border-blue-400">
-          <div class="bg-blue-500 text-white p-2 rounded-lg text-xl">💎</div>
-          <div class="flex-1">
-            <p class="font-bold text-gray-800">Pix</p>
-            <p class="text-xs text-gray-500">Aprovação imediata</p>
-          </div>
-          <span class="text-green-500 font-bold">5% OFF</span>
-        </div>
+      <button (click)="confirmarPagamento('Cartão de Crédito')" 
+              class="w-full py-4 bg-[#2d2926] text-white rounded-2xl font-black uppercase tracking-widest hover:bg-black transition-all">
+        Cartão de Crédito
+      </button>
 
-        <div (click)="confirmarPagamento()" class="border-2 border-purple-100 p-4 rounded-2xl flex items-center gap-4 hover:bg-purple-50 cursor-pointer transition hover:border-purple-400">
-          <div class="bg-purple-500 text-white p-2 rounded-lg text-xl">💳</div>
-          <div class="flex-1">
-            <p class="font-bold text-gray-800">Cartão de Crédito</p>
-            <p class="text-xs text-gray-500">Em até 12x sem juros</p>
-          </div>
-        </div>
+      <button (click)="confirmarPagamento('Débito')" 
+              class="w-full py-4 border-2 border-[#d6ccc2] text-[#2d2926] rounded-2xl font-black uppercase tracking-widest hover:bg-[#ede7e1] transition-all">
+        Débito
+      </button>
 
-        <div (click)="confirmarPagamento()" class="border-2 border-emerald-100 p-4 rounded-2xl flex items-center gap-4 hover:bg-emerald-50 cursor-pointer transition hover:border-emerald-400">
-          <div class="bg-emerald-500 text-white p-2 rounded-lg text-xl">🏦</div>
-          <div class="flex-1">
-            <p class="font-bold text-gray-800">Cartão de Débito</p>
-            <p class="text-xs text-gray-500">Pagamento à vista</p>
-          </div>
-        </div>
+      <button (click)="voltarParaCarrinho()" 
+              class="w-full py-4 text-[#8c786a] font-black uppercase text-[10px] tracking-[0.2em] mt-2 underline">
+        Voltar ao carrinho
+      </button>
+    </div>
+  </div>
+</div>
 
-        <div (click)="confirmarPagamento()" class="border-2 border-orange-100 p-4 rounded-2xl flex items-center gap-4 hover:bg-orange-50 cursor-pointer transition hover:border-orange-400">
-          <div class="bg-orange-500 text-white p-2 rounded-lg text-xl">📄</div>
-          <div class="flex-1">
-            <p class="font-bold text-gray-800">Boleto Bancário</p>
-            <p class="text-xs text-gray-500">Vence em 3 dias úteis</p>
-          </div>
-        </div>
-
-      </div>
-      <div class="mt-8 flex gap-3">
-        <button (click)="voltarParaCarrinho()" class="flex-1 py-3 font-semibold text-gray-500 hover:bg-gray-100 rounded-xl transition">Voltar</button>
-        <button (click)="confirmarPagamento()" class="flex-[2] py-3 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition shadow-lg">Confirmar</button>
-      </div>
+<div *ngIf="exibirLogin" class="min-h-screen flex items-center justify-center bg-[#f7f3f0]">
+  <div class="max-w-sm w-full bg-white rounded-[3rem] shadow-xl p-12 border border-[#ede7e1] text-center">
+    <h2 class="text-2xl font-black mb-10 tracking-[0.3em] uppercase">LOGIN</h2>
+    <div class="space-y-5 text-left">
+      <input type="email" [(ngModel)]="emailDigitado" (keyup.enter)="senhaInput.focus()" placeholder="E-MAIL" 
+             class="w-full px-6 py-4 rounded-2xl bg-[#f0eae4] border-2 border-transparent focus:border-[#b06d50] outline-none font-black">
+      <input #senhaInput type="password" [(ngModel)]="senhaDigitada" (keyup.enter)="fazerLogin()" placeholder="SENHA" 
+             class="w-full px-6 py-4 rounded-2xl bg-[#f0eae4] border-2 border-transparent focus:border-[#b06d50] outline-none font-black">
+      <button (click)="fazerLogin()" class="w-full bg-[#b06d50] text-white font-black py-5 rounded-2xl mt-8 uppercase shadow-lg">Acessar</button>
     </div>
   </div>
 </div>
